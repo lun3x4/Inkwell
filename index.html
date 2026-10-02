@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1b2436">
+<title>Inkwell</title>
+<style>
+:root{--ui:#1b2436;--uif:#e9ecf3;--hi:#f2c14e;--card:#fbfaf5;--cardfg:#1d2433;--line:#cfd3dc}
+:root[data-theme=dark]{--card:#2a3042;--cardfg:#eceef5;--line:#4a526a}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:#fff;font:15px system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+body.hand canvas{cursor:grab}
+#layer{position:fixed;left:0;top:0;transform-origin:0 0;pointer-events:none}
+.note{position:absolute;display:flex;flex-direction:column;min-width:140px;min-height:70px;background:var(--card);color:var(--cardfg);border:1px solid var(--line);border-radius:6px;box-shadow:0 3px 12px #0003;resize:both;overflow:hidden;pointer-events:none}
+body.text .note{pointer-events:auto}
+.grip{display:none;height:26px;flex:none;align-items:center;justify-content:space-between;padding:0 8px;background:var(--line);cursor:grab;touch-action:none;color:var(--cardfg)}
+body.text .grip{display:flex}
+.grip b{cursor:pointer;font-size:20px;line-height:1;padding:0 4px}
+.body{flex:1;padding:10px 12px;outline:none;overflow:auto;font:19px/1.5 Georgia,"Iowan Old Style",serif;white-space:pre-wrap;-webkit-user-select:text;user-select:text}
+.bar{position:fixed;display:flex;align-items:center;gap:6px;background:var(--ui);color:var(--uif);padding:6px;border-radius:14px;box-shadow:0 6px 24px #0005;max-width:calc(100vw - 16px);overflow-x:auto}
+#bar{left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+#top{right:8px;top:calc(8px + env(safe-area-inset-top,0px))}
+#brand{position:fixed;left:14px;top:calc(8px + env(safe-area-inset-top,0px));font:italic 700 26px Georgia,serif;color:var(--uif);background:var(--ui);padding:4px 14px 6px;border-radius:14px;pointer-events:none}
+.bar button{min-width:46px;height:46px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:inherit;font:inherit;cursor:pointer;white-space:nowrap}
+.bar button.on{background:var(--hi);color:#1b2436;font-weight:600}
+.bar button:focus-visible,.bar input:focus-visible{outline:2px solid var(--hi);outline-offset:1px}
+.sep{width:1px;height:28px;background:#ffffff30;margin:0 4px;flex:none}
+.sw{width:34px!important;min-width:34px!important;height:34px!important;border-radius:50%!important;padding:0!important;border:2px solid #ffffff50!important}
+.sw.on{outline:3px solid var(--hi);outline-offset:2px}
+input[type=range]{width:90px;accent-color:var(--hi)}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="layer"></div>
+<div id="brand">Inkwell</div>
+<nav class="bar" id="top" aria-label="Page">
+  <button data-b="paper">Paper</button><button data-b="grid">Grid</button><button data-b="dots">Dots</button><button data-b="plain">Plain</button>
+  <span class="sep"></span><button id="th">Dark</button><button id="zoom" title="Reset view">100%</button>
+</nav>
+<nav class="bar" id="bar" aria-label="Tools">
+  <button data-t="pen">Pen</button><button data-t="hl">Marker</button><button data-t="er">Eraser</button><button data-t="text">Text</button><button data-t="hand">Move</button>
+  <span class="sep"></span><span id="cols" style="display:flex;gap:8px"></span>
+  <span class="sep"></span><input type="range" id="sz" min="1" max="12" value="3" aria-label="Size">
+  <span class="sep"></span><button id="un">Undo</button><button id="re">Redo</button>
+</nav>
+<script>
+const $=s=>document.querySelector(s), cv=$('#cv'), ctx=cv.getContext('2d'), layer=$('#layer');
+let S={strokes:[],texts:[],view:{x:0,y:0,z:1},bg:'paper',theme:matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'};
+let tool='pen',color='auto',size=3,undo=[],redo=[],dirty=true,cur=null,pan=null,erased=null,g=null,space=false,lastPen=0;
+const ptrs=new Map(), PAL=['auto','#d33a2c','#e08a1e','#2f8f4e','#2f6fd0','#7a3fb5'];
+
+/* ---------- storage (IndexedDB) ---------- */
+const db=new Promise((res,rej)=>{const r=indexedDB.open('inkwell',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const kvGet=k=>db.then(d=>new Promise(r=>{const q=d.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r()})).catch(()=>{});
+const kvSet=(k,v)=>db.then(d=>d.transaction('kv','readwrite').objectStore('kv').put(v,k)).catch(()=>{});
+let st;const save=()=>{clearTimeout(st);st=setTimeout(()=>kvSet('doc',S),400)};
+
+/* ---------- view ---------- */
+const V=()=>S.view;
+function setView(){const{x,y,z}=V();layer.style.transform=`translate(${x}px,${y}px) scale(${z})`;$('#zoom').textContent=Math.round(z*100)+'%';dirty=true;save()}
+function zoomAt(px,py,f){const v=V(),nz=Math.min(8,Math.max(.1,v.z*f)),k=nz/v.z;v.x=px-(px-v.x)*k;v.y=py-(py-v.y)*k;v.z=nz}
+function resize(){const d=devicePixelRatio||1;cv.width=innerWidth*d;cv.height=innerHeight*d;dirty=true}
+
+/* ---------- drawing ---------- */
+const dark=()=>S.theme==='dark', ink=s=>s.color==='auto'?(s.tool==='hl'?'#ffe14d':dark()?'#f2efe6':'#1b1b1b'):s.color;
+function seg(s,i){const p=s.pts;ctx.lineWidth=s.size*(.4+1.2*p[i][2]);ctx.beginPath();ctx.moveTo(p[i-1][0],p[i-1][1]);ctx.lineTo(p[i][0],p[i][1]);ctx.stroke()}
+function drawStroke(s){const p=s.pts;ctx.lineCap=ctx.lineJoin='round';ctx.strokeStyle=ink(s);
+  if(s.tool==='hl'){ctx.globalAlpha=.4;ctx.lineWidth=s.size*5;ctx.beginPath();ctx.moveTo(p[0][0],p[0][1]);p.forEach(q=>ctx.lineTo(q[0],q[1]));if(p.length==1)ctx.lineTo(p[0][0]+.01,p[0][1]);ctx.stroke();ctx.globalAlpha=1;return}
+  if(p.length==1){ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.arc(p[0][0],p[0][1],s.size*.6,0,7);ctx.fill();return}
+  for(let i=1;i<p.length;i++)seg(s,i)}
+function render(){dirty=false;const d=devicePixelRatio||1,{x,y,z}=V(),W=innerWidth,H=innerHeight,k=dark();
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.fillStyle=S.bg==='paper'?(k?'#262a37':'#f5f3ea'):(k?'#1d212c':'#fdfdfb');ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.setTransform(d,0,0,d,0,0);
+  if(S.bg!=='plain'){let s=32;while(s*z<14)s*=2;const lc=k?'#ffffff':'#2a4a7a',x0=Math.floor(-x/z/s),y0=Math.floor(-y/z/s),x1=(W-x)/z,y1=(H-y)/z;
+    if(S.bg==='dots'){ctx.fillStyle=lc;ctx.globalAlpha=.4;for(let i=x0;i*s<x1;i++)for(let j=y0;j*s<y1;j++)ctx.fillRect(i*s*z+x-1,j*s*z+y-1,2,2);ctx.globalAlpha=1}
+    else{ctx.strokeStyle=lc;ctx.lineWidth=1;
+      for(let j=y0;j*s<y1;j++){ctx.globalAlpha=S.bg==='grid'&&j%5==0?.28:.16;const sy=Math.round(j*s*z+y)+.5;ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(W,sy);ctx.stroke()}
+      if(S.bg==='grid')for(let i=x0;i*s<x1;i++){ctx.globalAlpha=i%5==0?.28:.16;const sx=Math.round(i*s*z+x)+.5;ctx.beginPath();ctx.moveTo(sx,0);ctx.lineTo(sx,H);ctx.stroke()}
+      ctx.globalAlpha=1}}
+  ctx.setTransform(d*z,0,0,d*z,x*d,y*d);
+  const vx0=-x/z,vy0=-y/z,vx1=(W-x)/z,vy1=(H-y)/z;
+  for(const s of S.strokes){const b=s.bb;if(b&&(b[2]<vx0||b[0]>vx1||b[3]<vy0||b[1]>vy1))continue;drawStroke(s)}}
+const bbox=s=>{const m=s.size*3;let a=1e9,b=1e9,c=-1e9,e=-1e9;for(const p of s.pts){a=Math.min(a,p[0]);b=Math.min(b,p[1]);c=Math.max(c,p[0]);e=Math.max(e,p[1])}return[a-m,b-m,c+m,e+m]};
+const world=e=>[(e.clientX-V().x)/V().z,(e.clientY-V().y)/V().z];
+const pt=e=>{const[w,h]=world(e);return[Math.round(w*10)/10,Math.round(h*10)/10,e.pressure||.5]};
+
+/* ---------- touch pan / pinch ---------- */
+const touches=()=>[...ptrs.values()].filter(p=>p.t==='touch');
+const cen=t=>({x:t.reduce((a,p)=>a+p.x,0)/t.length,y:t.reduce((a,p)=>a+p.y,0)/t.length});
+const dist=t=>t.length>1?Math.hypot(t[0].x-t[1].x,t[0].y-t[1].y):0;
+function gstart(){const t=touches();if(!t.length){g=null;return}g={...cen(t),d:dist(t)}}
+
+/* ---------- pointer input ---------- */
+function eraseAt(e){const[wx,wy]=world(e),r=(8+size*2)/V().z,keep=[];
+  for(const s of S.strokes){const b=s.bb;let hit=false;
+    if(!b||(wx>b[0]-r&&wx<b[2]+r&&wy>b[1]-r&&wy<b[3]+r))hit=s.pts.some(p=>Math.abs(p[0]-wx)<r&&Math.abs(p[1]-wy)<r&&Math.hypot(p[0]-wx,p[1]-wy)<r);
+    hit?erased.push(s):keep.push(s)}
+  if(keep.length!==S.strokes.length){S.strokes=keep;dirty=true}}
+cv.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='pen')lastPen=performance.now();
+  if(e.pointerType==='touch'&&(cur||performance.now()-lastPen<800))return; // palm rejection
+  cv.setPointerCapture(e.pointerId);
+  const p={x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,t0:performance.now(),t:e.pointerType};ptrs.set(e.pointerId,p);
+  if(e.pointerType==='touch'){if(touches().length>1)for(const q of ptrs.values())q.multi=1;gstart();return}
+  if(e.button===1||tool==='hand'||space){pan={x:e.clientX,y:e.clientY};document.body.style.cursor='grabbing';return}
+  if(e.button!==0&&e.pointerType==='mouse')return;
+  if(tool==='pen'||tool==='hl'){cur={tool,color,size,pts:[pt(e)]};S.strokes.push(cur);if(tool==='pen'){drawStroke(cur)}else dirty=true;
+    ctx.setTransform((devicePixelRatio||1)*V().z,0,0,(devicePixelRatio||1)*V().z,V().x*(devicePixelRatio||1),V().y*(devicePixelRatio||1))}
+  else if(tool==='er'){erased=[];eraseAt(e)}
+  else if(tool==='text'){e.preventDefault();addText(...world(e))}
+});
+cv.addEventListener('pointermove',e=>{
+  if(e.pointerType==='pen')lastPen=performance.now();
+  const p=ptrs.get(e.pointerId);if(!p)return;
+  if(p.t==='touch'){p.x=e.clientX;p.y=e.clientY;if(!g)return;const t=touches(),c=cen(t),d=dist(t);
+    V().x+=c.x-g.x;V().y+=c.y-g.y;if(t.length>1&&g.d)zoomAt(c.x,c.y,d/g.d);g={...c,d};setView();return}
+  if(pan){V().x+=e.clientX-pan.x;V().y+=e.clientY-pan.y;pan={x:e.clientX,y:e.clientY};setView();return}
+  if(cur){for(const ev of(e.getCoalescedEvents?.()||[e])){cur.pts.push(pt(ev));if(cur.tool==='pen')seg(cur,cur.pts.length-1);else dirty=true}return}
+  if(erased)eraseAt(e)});
+function end(e){const p=ptrs.get(e.pointerId);if(!p)return;ptrs.delete(e.pointerId);
+  if(p.t==='touch'){if(tool==='text'&&!p.multi&&e.type==='pointerup'&&Math.hypot(e.clientX-p.x0,e.clientY-p.y0)<8&&performance.now()-p.t0<400)addText(...world(e));gstart();return}
+  if(pan){pan=null;document.body.style.cursor='';return}
+  if(cur){if(cur.pts.length){cur.bb=bbox(cur);undo.push({t:'add',s:cur});redo=[]}cur=null;dirty=true;save()}
+  if(erased){if(erased.length){undo.push({t:'del',s:erased});redo=[]}erased=null;save()}}
+cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+cv.addEventListener('wheel',e=>{e.preventDefault();
+  if(e.ctrlKey||e.metaKey||e.deltaMode===1||(e.deltaX===0&&Math.abs(e.deltaY)>=100))zoomAt(e.clientX,e.clientY,Math.exp(-e.deltaY*(e.ctrlKey?.01:.0015)));
+  else{V().x-=e.deltaX;V().y-=e.deltaY}setView()},{passive:false});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+
+/* ---------- undo / redo ---------- */
+function apply(a,rev){const add=(a.t==='add')!==rev;if(add)S.strokes.push(...[].concat(a.s));else{const r=[].concat(a.s);S.strokes=S.strokes.filter(s=>!r.includes(s))}dirty=true;save()}
+const doUndo=()=>{const a=undo.pop();if(a){apply(a,true);redo.push(a)}};
+const doRedo=()=>{const a=redo.pop();if(a){apply(a,false);undo.push(a)}};
+
+/* ---------- typed notes ---------- */
+function mkNote(t){const n=document.createElement('div');n.className='note';n.style.cssText=`left:${t.x}px;top:${t.y}px;width:${t.w}px;height:${t.h}px`;
+  n.innerHTML='<div class="grip"><span>Drag</span><b title="Delete">×</b></div><div class="body" contenteditable="plaintext-only"></div>';
+  const b=n.querySelector('.body'),gr=n.querySelector('.grip'),rm=()=>{S.texts=S.texts.filter(x=>x!==t);n.remove();save()};
+  b.textContent=t.text;b.oninput=()=>{t.text=b.innerText;save()};b.onblur=()=>{if(!b.innerText.trim())rm()};
+  n.querySelector('b').onclick=rm;
+  let d=null;gr.onpointerdown=e=>{if(e.target.tagName==='B')return;gr.setPointerCapture(e.pointerId);d={x:e.clientX,y:e.clientY}};
+  gr.onpointermove=e=>{if(!d)return;t.x+=(e.clientX-d.x)/V().z;t.y+=(e.clientY-d.y)/V().z;d={x:e.clientX,y:e.clientY};n.style.left=t.x+'px';n.style.top=t.y+'px'};
+  gr.onpointerup=()=>{d=null;save()};
+  new ResizeObserver(()=>{t.w=n.offsetWidth;t.h=n.offsetHeight;save()}).observe(n);
+  layer.appendChild(n);return b}
+function addText(x,y){const t={x:Math.round(x),y:Math.round(y),w:260,h:130,text:''};S.texts.push(t);const b=mkNote(t);setTimeout(()=>b.focus(),30)}
+
+/* ---------- UI ---------- */
+function sync(){document.documentElement.dataset.theme=S.theme;document.body.className=tool;
+  document.querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===tool));
+  document.querySelectorAll('[data-b]').forEach(b=>b.classList.toggle('on',b.dataset.b===S.bg));
+  document.querySelectorAll('.sw').forEach(b=>b.classList.toggle('on',b.dataset.c===color));
+  $('#th').textContent=dark()?'Light':'Dark';dirty=true}
+document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tool=b.dataset.t;sync()});
+document.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{S.bg=b.dataset.b;sync();save()});
+PAL.forEach(c=>{const b=document.createElement('button');b.className='sw';b.dataset.c=c;b.setAttribute('aria-label','Colour '+c);
+  b.style.background=c==='auto'?'conic-gradient(#111 50%,#f2efe6 0)':c;b.onclick=()=>{color=c;if(tool==='er'||tool==='hand'||tool==='text')tool='pen';sync()};$('#cols').appendChild(b)});
+$('#sz').oninput=e=>size=+e.target.value;
+$('#un').onclick=doUndo;$('#re').onclick=doRedo;
+$('#th').onclick=()=>{S.theme=dark()?'light':'dark';sync();save()};
+$('#zoom').onclick=()=>{Object.assign(V(),{x:0,y:0,z:1});setView()};
+addEventListener('keydown',e=>{if(e.target.isContentEditable)return;
+  if(e.code==='Space'){space=true;e.preventDefault()}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?doRedo():doUndo()}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();doRedo()}});
+addEventListener('keyup',e=>{if(e.code==='Space')space=false});
+addEventListener('resize',resize);
+(function loop(){if(dirty)render();requestAnimationFrame(loop)})();
+
+/* ---------- boot ---------- */
+(async()=>{const d=await kvGet('doc');
+  if(d)S=Object.assign(S,d);
+  else S.texts.push({x:60,y:130,w:330,h:190,text:'Welcome to Inkwell.\n\nDraw with your stylus. Drag with a finger to pan, pinch to zoom. Pick Text and tap anywhere to type.\n\nThe canvas never ends.'});
+  S.texts.forEach(mkNote);resize();sync();setView();navigator.storage?.persist?.()})();
+</script>
+</body>
+</html>

@@ -11,7 +11,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:var(--paper);color:var(--fg);font:15px system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 canvas#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
-body.select #cv{cursor:default}body.er #cv{cursor:none}
+body.select #cv{cursor:default}body.er #cv,body.pen #cv,body.hl #cv{cursor:none}
 #layer{position:fixed;left:0;top:0;transform-origin:0 0;pointer-events:none}
 #ecur{position:fixed;display:none;z-index:9;pointer-events:none;border:1.5px solid var(--fg);border-radius:50%;box-shadow:0 0 0 1px var(--paper)}
 .note{position:absolute;display:flex;flex-direction:column;overflow:hidden;pointer-events:none}
@@ -30,7 +30,7 @@ body.text .note{pointer-events:auto;outline:calc(1px*var(--iz)) dashed color-mix
 .view hr{border:0;border-top:1px solid var(--bd)}.view a{color:var(--acc)}.view .m[data-d]{display:block;text-align:center;margin:.3em 0}
 .tk{color:var(--tk)}.ts{color:var(--ts)}.tc{color:var(--tc);font-style:italic}.tn{color:var(--tn)}.tf{color:var(--tf)}
 /* selection frame */
-#sf{position:absolute;left:0;top:0;display:none;z-index:5;border:calc(1.5px*var(--iz)) dashed var(--acc);pointer-events:none}
+#sf{position:absolute;left:0;top:0;transform-origin:0 0;display:none;z-index:5;border:calc(1.5px*var(--iz)) dashed var(--acc);pointer-events:none}
 #sf .e{position:absolute;pointer-events:auto;cursor:move;touch-action:none}
 #sf .t,#sf .b{left:0;right:0;height:calc(14px*var(--iz))}#sf .t{top:calc(-7px*var(--iz))}#sf .b{bottom:calc(-7px*var(--iz))}
 #sf .l,#sf .r{top:0;bottom:0;width:calc(14px*var(--iz))}#sf .l{left:calc(-7px*var(--iz))}#sf .r{right:calc(-7px*var(--iz))}
@@ -88,6 +88,7 @@ body.select #bs,body.select #bo,body.er #bo,body.er #bc{display:none}
 #modal{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:#0006}#modal[hidden]{display:none}
 .card{background:var(--ui);border:1px solid var(--bd);border-radius:20px;padding:18px 20px;width:min(440px,92vw);box-shadow:0 10px 40px #0005}
 .mh{display:flex;justify-content:space-between;align-items:center;font-size:20px;margin-bottom:8px}.mh button{width:40px;height:40px;font-size:26px}
+.row small{display:block;opacity:.65;font-size:12px}
 .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-size:16px}
 #asw{display:grid;grid-template-columns:repeat(10,26px);gap:6px;margin-bottom:8px}
 input[type=checkbox]{accent-color:var(--acc);width:22px;height:22px}
@@ -150,6 +151,7 @@ input[type=checkbox]{accent-color:var(--acc);width:22px;height:22px}
 <div id="modal" hidden><div class="card"><div class="mh"><b>Settings</b><button id="mx" aria-label="Close">×</button></div>
 <div class="row"><span>Accent color</span></div><div id="asw"></div>
 <label class="row"><span>Pressure sensitivity</span><input type="checkbox" data-o="pressure"></label>
+<label class="row"><span>Stylus recognition<small>Turn off to draw with your finger</small></span><input type="checkbox" data-o="stylus"></label>
 <label class="row"><span>Palm rejection</span><input type="checkbox" data-o="palm"></label>
 <label class="row"><span>Auto-close brackets</span><input type="checkbox" data-o="pair"></label></div></div>
 <script>
@@ -209,11 +211,11 @@ function md(src){const L=src.split('\n'),o=[];let i=0,list=null;const close=()=>
 /*ENDPURE*/
 
 const $=s=>document.querySelector(s),cv=$('#cv'),ctx=cv.getContext('2d'),layer=$('#layer'),sf=$('#sf'),ec=$('#ecur');
-let S={opt:{pressure:1,palm:1,pair:0},accent:'#e0562d',name:'',strokes:[],texts:[],view:{x:0,y:0,z:1},bg:'paper',theme:matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'};
+let S={opt:{pressure:1,palm:1,pair:0,stylus:1},accent:'#e0562d',name:'',strokes:[],texts:[],view:{x:0,y:0,z:1},bg:'paper',theme:matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'};
 let tool='select',color='auto',undo=[],redo=[],dirty=true,cur=null,pan=null,eg=null,g=null,space=false,lastPen=0,tbox=null,lastTap=null,SEL=null,drag=null,lz=null,zT,fi=0,tmode='text',shp={kind:'rect',st:'solid'};
 let SZ={pen:15,hl:20,er:30,shape:10,text:22},AL={pen:100,hl:40,shape:100,text:100};
 const ptrs=new Map(),EL=new WeakMap(),RF=new WeakMap(),V=()=>S.view,dark=()=>S.theme==='dark';
-const FONTS=['Georgia,"Iowan Old Style",serif','system-ui,-apple-system,"Segoe UI",sans-serif','ui-monospace,Menlo,Consolas,monospace','"Bradley Hand","Segoe Script","Comic Sans MS","Marker Felt",cursive'],FN=['Serif','Sans','Mono','Hand'];
+const FONTS=["Georgia,'Iowan Old Style',serif","system-ui,-apple-system,'Segoe UI',sans-serif","ui-monospace,Menlo,Consolas,monospace","'Bradley Hand','Segoe Script','Comic Sans MS','Marker Felt',cursive"],FN=['Serif','Sans','Mono','Hand'];
 const PAPERS=[['paper','Ruled'],['paperL','Wide ruled'],['grid','Grid'],['gridL','Large grid'],['dots','Dots'],['plain','Plain']],PAIRS={'(':')','[':']','{':'}','"':'"',"'":"'",'`':'`','<':'>'};
 
 /* ---------- storage ---------- */
@@ -293,7 +295,8 @@ const touches=()=>[...ptrs.values()].filter(p=>p.t==='touch');
 const cen=t=>({x:t.reduce((a,p)=>a+p.x,0)/t.length,y:t.reduce((a,p)=>a+p.y,0)/t.length});
 const dist=t=>t.length>1?Math.hypot(t[0].x-t[1].x,t[0].y-t[1].y):0;
 function gstart(){const t=touches();if(!t.length){g=null;return}g={...cen(t),d:dist(t)}}
-const showEc=e=>{const d=SZ.er;ec.style.cssText=`display:block;width:${d}px;height:${d}px;left:${e.clientX-d/2}px;top:${e.clientY-d/2}px`};
+const showEc=e=>{const z=V().z,d=tool==='er'?SZ.er:tool==='hl'?Math.max(6,SZ.hl*z):Math.max(6,SZ.pen/5*z);ec.style.cssText=`display:block;width:${d}px;height:${d}px;left:${e.clientX-d/2}px;top:${e.clientY-d/2}px`};
+const CUR=()=>tool==='er'||tool==='pen'||tool==='hl';
 function eraseAt(e){const[wx,wy]=world(e),r=SZ.er/2/V().z,out=[];let ch=false;
   for(const s of S.strokes){let pieces=null;
     if(s.tool==='shape'){if(Math.hypot(s.cx-wx,s.cy-wy)>Math.hypot(s.w,s.h)/2+s.size+r+20){out.push(s);continue}
@@ -303,13 +306,20 @@ function eraseAt(e){const[wx,wy]=world(e),r=SZ.er/2/V().z,out=[];let ch=false;
       const c=clip(s.pts,wx,wy,r);if(!c){out.push(s);continue}pieces=c.map(pts=>{const o={...s,pts};o.bb=bbox(o);return o})}
     ch=true;if(eg.add.has(s))eg.add.delete(s);else eg.rem.add(s);pieces.forEach(p=>eg.add.add(p));out.push(...pieces)}
   if(ch){S.strokes=out;dirty=true;if(SEL&&SEL.k==='shape'&&!out.includes(SEL.o))desel()}}
+function cancelAct(){if(cur){S.strokes=S.strokes.filter(x=>x!==cur);cur=null;dirty=true}
+  if(eg){if(eg.rem.size||eg.add.size){undo.push({rem:[...eg.rem],add:[...eg.add]});redo=[]}eg=null;save()}
+  if(tbox){const t=tbox.t;S.texts=S.texts.filter(x=>x!==t);EL.get(t).remove();tbox=null}pan=null}
 cv.addEventListener('pointerdown',e=>{const now=performance.now();if(e.pointerType==='pen')lastPen=now;
-  if(e.pointerType==='touch'&&(cur||(S.opt.palm&&now-lastPen<800)))return;
+  const fing=e.pointerType==='touch'&&!S.opt.stylus;
+  if(e.pointerType==='touch'&&!fing&&(cur||(S.opt.palm&&now-lastPen<800)))return;
   cv.setPointerCapture(e.pointerId);
-  const p={x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,t0:now,t:e.pointerType};ptrs.set(e.pointerId,p);
+  const p={x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,t0:now,t:e.pointerType};
+  if(fing){const o=[...ptrs.values()].filter(q=>q.fd||q.t==='touch');if(o.length){o.forEach(q=>{if(q.fd){cancelAct();q.fd=0;q.t='touch'}q.multi=1});p.t='touch';p.multi=1}else{p.t='mouse';p.fd=1}}
+  ptrs.set(e.pointerId,p);
   if(p.t==='touch'){if(touches().length>1)for(const q of ptrs.values())q.multi=1;else if(tool==='select'||tool==='shape')selDown(e,p);gstart();return}
   if(e.button===1||space){pan={x:e.clientX,y:e.clientY};document.body.style.cursor='grabbing';return}
   if(e.button!==0&&p.t==='mouse')return;
+  if(CUR())showEc(e);
   if(tool==='select'){if(!selDown(e,p))pan={x:e.clientX,y:e.clientY};return}
   if(tool==='shape'&&selDown(e,p))return;
   if(tool==='pen'||tool==='hl'){cur={tool,color,size:SZ[tool]/5,alpha:AL[tool]/100,pts:[pt(e)]};S.strokes.push(cur);if(tool==='pen')drawStroke(cur);else dirty=true}
@@ -317,9 +327,9 @@ cv.addEventListener('pointerdown',e=>{const now=performance.now();if(e.pointerTy
   else if(tool==='er'){eg={rem:new Set(),add:new Set()};showEc(e);eraseAt(e)}
   else if(tool==='text'){e.preventDefault();desel();const a=world(e);tbox={a,...addText(a[0],a[1],0,0,false)}}});
 cv.addEventListener('pointermove',e=>{if(e.pointerType==='pen')lastPen=performance.now();
-  if(tool==='er'&&e.pointerType!=='touch')showEc(e);
-  const p=ptrs.get(e.pointerId);if(!p)return;
-  if(p.t==='touch'){p.x=e.clientX;p.y=e.clientY;if(!g)return;const t=touches(),c=cen(t),d=dist(t);
+  if(CUR()&&(e.pointerType!=='touch'||!S.opt.stylus))showEc(e);
+  const p=ptrs.get(e.pointerId);if(!p)return;p.x=e.clientX;p.y=e.clientY;
+  if(p.t==='touch'){if(!g)return;const t=touches(),c=cen(t),d=dist(t);
     if(p.item&&!p.multi){if(!p.mvd&&Math.hypot(p.x-p.x0,p.y-p.y0)<4)return;p.mvd=1;moveItem(p,c.x-g.x,c.y-g.y);g={...c,d:0};return}
     V().x+=c.x-g.x;V().y+=c.y-g.y;if(t.length>1&&g.d)zoomAt(c.x,c.y,d/g.d);g={...c,d};setView();return}
   if(tbox){const[x,y]=world(e),t=tbox.t;t.x=Math.min(tbox.a[0],x);t.y=Math.min(tbox.a[1],y);t.w=Math.abs(x-tbox.a[0]);t.h=Math.abs(y-tbox.a[1]);place(t);return}
@@ -402,7 +412,7 @@ function pvSize(){const c=inkc(),a=curAl()/100;
   const d=tool==='hl'?SZ.hl:SZ.pen/5;return`<i style="width:${d}px;height:${d}px;border-radius:50%;background:${c};opacity:${a}"></i>`}
 function sync(){const R=document.documentElement;R.dataset.theme=S.theme;R.style.setProperty('--acc',S.accent);document.body.className=tool;
   if(SEL&&!(SEL.k==='note'?(tool==='text'||tool==='select'):(tool==='shape'||tool==='select')))desel();
-  if(tool!=='er')ec.style.display='none';
+  if(!CUR())ec.style.display='none';
   const on=(sel,k,val)=>document.querySelectorAll(sel).forEach(b=>b.classList.toggle('on',b.dataset[k]==val));
   on('[data-t]','t',tool);on('[data-p]','p',S.bg);on('[data-f]','f',fi);on('[data-c]','c',color);on('[data-a]','a',S.accent);on('[data-m]','m',tmode);
   document.querySelectorAll('[data-so]').forEach(b=>b.classList.toggle('on',b.dataset.so===shp.kind+'|'+shp.st));
@@ -415,7 +425,9 @@ const closeAll=()=>document.querySelectorAll('.pop').forEach(p=>p.classList.remo
 function pop(id,btn,side,keep){const p=$('#'+id),was=p.classList.contains('open');document.querySelectorAll('.pop').forEach(q=>{if(q.id!==keep)q.classList.remove('open')});if(was&&!keep)return;p.classList.add('open');
   const r=btn.getBoundingClientRect(),w=p.offsetWidth,h=p.offsetHeight;
   p.style.left=Math.max(8,side==='r'?r.right+10:r.left-10-w)+'px';p.style.top=Math.max(56,Math.min(r.top+r.height/2-h/2,innerHeight-h-70))+'px'}
-document.addEventListener('pointerdown',e=>{if(!e.target.closest('.pop,.panel'))closeAll()});
+let sw=0;
+document.addEventListener('pointerdown',e=>{if(e.target.closest('.pop,.panel'))return;if(document.querySelector('.pop.open')){closeAll();e.stopPropagation();e.preventDefault();sw=performance.now()+700}},true);
+document.addEventListener('click',e=>{if(sw>performance.now()&&!e.target.closest('.pop,.panel')){e.stopPropagation();e.preventDefault();sw=0}},true);
 const open=id=>$('#'+id).classList.contains('open');
 document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const t=b.dataset.t,was=tool===t&&(open('psh')||open('psh2')||open('ptx'));tool=t;closeAll();sync();if(!was){if(t==='shape')pop('psh',b,'r');if(t==='text')pop('ptx',b,'r')}});
 $('#ptx').onclick=e=>{const b=e.target.closest('[data-m]');if(b){tmode=b.dataset.m;closeAll();applySel();sync()}};
@@ -462,7 +474,7 @@ $('#home').onclick=()=>{Object.assign(V(),{x:0,y:0,z:1});setView()};
 $('#fname').oninput=e=>{S.name=e.target.value;title();save()};
 $('#ex').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download=((S.name||'inkwell').replace(/[\\/:*?"<>|]+/g,'-'))+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 $('#im').onclick=()=>$('#file').click();
-function load(d){S=Object.assign(S,d);S.sz=SZ=Object.assign(SZ,S.sz);S.al=AL=Object.assign(AL,S.al);S.opt=Object.assign({pressure:1,palm:1,pair:0},S.opt);S.accent=S.accent||'#e0562d';
+function load(d){S=Object.assign(S,d);S.sz=SZ=Object.assign(SZ,S.sz);S.al=AL=Object.assign(AL,S.al);S.opt=Object.assign({pressure:1,palm:1,pair:0,stylus:1},S.opt);S.accent=S.accent||'#e0562d';
   S.strokes=S.strokes.map(s=>s.tool==='shape'&&s.pts?{...s,tool:'poly',dash:null}:s);layer.querySelectorAll('.note').forEach(n=>n.remove());SEL=null;
   S.texts.forEach(t=>{t.mode=t.mode||'text';mkNote(t)});$('#fname').value=S.name||'';title()}
 $('#file').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f||!confirm('Replace the current canvas with this file?'))return;

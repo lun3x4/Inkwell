@@ -140,13 +140,13 @@ button:active{transform:scale(.93)}
 .rb input[type=range]{width:110px;margin:0;accent-color:var(--acc)}.rb b{font-weight:500}
 /* left bar: spine + D-shaped tray (reference image) */
 #tools{position:fixed;left:0;top:0;bottom:0;width:96px;z-index:9;pointer-events:none}
-#tools .tb{left:0;padding:16px 10px 16px 8px;border:1.5px solid var(--fg);border-left:0;border-radius:0 34px 34px 0;pointer-events:auto;transition:transform .5s var(--ease),opacity .3s}
+#tools .tb{left:0;padding:16px 10px 16px 8px;border:1px solid color-mix(in srgb,var(--fg) 14%,transparent);border-left:0;border-radius:0 34px 34px 0;pointer-events:auto;transition:transform .5s var(--ease),opacity .3s}
 @media (hover:hover) and (pointer:fine){#tools .tb{transform:translate(-115%,-50%);opacity:0;pointer-events:none}#tools.show .tb,#tools:has(:focus-visible) .tb{transform:translate(0,-50%);opacity:1;pointer-events:auto}}
 /* side/left buttons: animated resize */
 .panel button{transition:background-color .2s,color .2s,transform .3s var(--ease),opacity .25s,height .35s var(--ease),margin .35s var(--ease),visibility .3s}
 .panel button:hover{background:color-mix(in srgb,var(--fg) 9%,transparent)}
 .panel button.on{background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--acc)}
-body:not(.text) .txt,body:not(.shape) .shp,body.ln .shp,body.select #bs,body.select #bo,body.er #bo,body.er #bc,body.lasso #bs,body.lasso #bo,body.lasso #bc{height:0;margin:-2px 0;opacity:0;transform:scale(.4);pointer-events:none;visibility:hidden}
+body:not(.text) .txt,body:not(.img) #bim,body:not(.gph) #bgx,body.img #bc,body.gph #bc,body:not(.shape) .shp,body.ln .shp,body.select #bs,body.select #bo,body.er #bo,body.er #bc,body.lasso #bs,body.lasso #bo,body.lasso #bc{height:0;margin:-2px 0;opacity:0;transform:scale(.4);pointer-events:none;visibility:hidden}
 /* popovers, modals, map, frame */
 .pop{visibility:hidden;opacity:0;transform:translateY(8px) scale(.96);pointer-events:none;transition:opacity .22s,transform .35s var(--ease),visibility .22s}
 .pop.open{visibility:visible;opacity:1;transform:none;pointer-events:auto}
@@ -169,18 +169,27 @@ body:not(.text) .txt,body:not(.shape) .shp,body.ln .shp,body.select #bs,body.sel
 .panel button{width:var(--bsz,46px);height:var(--bsz,46px)}.panel .ic{width:calc(24px*var(--k,1));height:calc(24px*var(--k,1))}
 body.lasso #side{opacity:0;pointer-events:none}
 #gsel{position:absolute;border:calc(1.5px*var(--iz)) dashed var(--acc);background:color-mix(in srgb,var(--acc) 6%,transparent);border-radius:calc(6px*var(--iz));opacity:0;pointer-events:none;transition:opacity .2s}#gsel.vis{opacity:1}
-#ssg{display:grid;gap:6px}#ssg i{display:block;width:34px;height:34px;border-radius:10px;background:color-mix(in srgb,var(--fg) 38%,transparent);border:2px solid color-mix(in srgb,var(--fg) 25%,transparent);transition:background-color .15s,border-color .15s,transform .2s var(--ease)}
-#ssg i.on{background:color-mix(in srgb,var(--acc) 55%,#000);border-color:color-mix(in srgb,var(--acc) 70%,transparent);transform:scale(.94)}#ssl{margin-top:10px;text-align:center;font-size:14px}
+#ssg{display:grid;gap:4px}#ssg i{display:block;width:18px;height:18px;border-radius:6px;background:color-mix(in srgb,var(--fg) 38%,transparent);border:2px solid color-mix(in srgb,var(--fg) 25%,transparent);transition:background-color .15s,border-color .15s,transform .2s var(--ease)}
+#ssg i.on{background:color-mix(in srgb,var(--acc) 55%,#000);border-color:color-mix(in srgb,var(--acc) 70%,transparent);transform:scale(.94)}#ssl{margin-top:8px;text-align:center;font-size:13px}
 #play{width:240px}.lyt{font-size:12px;opacity:.7;margin:10px 0 4px}.lyt:first-child{margin-top:0}.seg{display:flex;gap:4px}.seg button{padding:6px 12px;border-radius:10px;border:1px solid var(--bd);font-size:13px}.seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .cg{display:grid;grid-template-columns:repeat(2,44px)}.lyr{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;margin-top:10px}.lyr input{width:120px;accent-color:var(--acc)}
 :root[data-lt=r] #tools{left:auto;right:0}
-:root[data-lt=r] #tools .tb{left:auto;right:0;padding:16px 8px 16px 10px;border:1.5px solid var(--fg);border-right:0;border-radius:34px 0 0 34px}
+:root[data-lt=r] #tools .tb{left:auto;right:0;padding:16px 8px 16px 10px;border:1px solid color-mix(in srgb,var(--fg) 14%,transparent);border-right:0;border-radius:34px 0 0 34px}
 @media (hover:hover) and (pointer:fine){:root[data-lt=r] #tools .tb{transform:translate(115%,-50%)}:root[data-lt=r] #tools.show .tb,:root[data-lt=r] #tools:has(:focus-visible) .tb{transform:translate(0,-50%)}}
 #side{right:calc(12px + var(--so,0px))}:root[data-ls=l] #side{left:calc(12px + var(--so,0px));right:auto}
 #mm:not(.big){width:calc(168px*var(--msz,1));height:calc(108px*var(--msz,1))}
 :root[data-lm=bl] #mm:not(.big){left:12px;right:auto}
 :root[data-lm=tr] #mm:not(.big){top:calc(100px + env(safe-area-inset-top,0px));bottom:auto}
 :root[data-lm=tl] #mm:not(.big){left:12px;right:auto;top:calc(100px + env(safe-area-inset-top,0px));bottom:auto}
+/* v4 */
+#pga .r,#prf .r{display:flex}#pga input,#prf input{width:200px;accent-color:var(--acc)}
+.pop,.card{-webkit-backdrop-filter:blur(30px) saturate(1.8);backdrop-filter:blur(30px) saturate(1.8);text-shadow:0 0 10px color-mix(in srgb,var(--paper) 55%,transparent)}
+.ctl button{background:color-mix(in srgb,var(--ui) 50%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-color:color-mix(in srgb,var(--fg) 14%,transparent)}
+#ptx small,#pgr small,.row small{opacity:.85}.gl{opacity:1;font-weight:500}
+.fi{background:color-mix(in srgb,var(--paper) 70%,transparent);border-color:color-mix(in srgb,var(--fg) 30%,transparent)}
+.rb span,.tab{text-shadow:0 0 8px color-mix(in srgb,var(--paper) 60%,transparent)}
+#pim,#pgx{width:262px}.seg{flex-wrap:wrap}.gsw{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.gsw input[type=color]{width:26px;height:26px;border:0;padding:0;background:none;cursor:pointer}
+.seg button[data-gs]{width:36px;padding:5px 0}
 </style>
 </head>
 <body>
@@ -211,6 +220,8 @@ body.lasso #side{opacity:0;pointer-events:none}
 <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
 <symbol id="i-lasso" viewBox="0 0 24 24"><path d="M9.500 3.500c3-.8 6.500.8 7.500 4 .9 3-1 5-1.500 8-.4 2.800-3 4.500-6 4-3-.5-4.500-3.200-4-6 .5-2.700 2.200-3.500 2.200-6 0-1.800.2-3.300 1.800-4z" stroke-dasharray="2.200 2.600"/></symbol>
 <symbol id="i-layout" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2.500"/><path d="M9 5v14"/></symbol>
+<symbol id="i-gopa" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 8.500l4.500 4.500M7.500 11.500L11.500 15.500M11.500 7.500l5 5"/></symbol>
+<symbol id="i-grf" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M7.500 13.500a4.700 4.700 0 0 1 4.200-5.800"/><circle cx="14.800" cy="8.200" r=".7"/></symbol>
 </defs></svg>
 <canvas id="cv"></canvas>
 <div id="layer"><div id="gsel"></div><div id="sf">
@@ -227,7 +238,7 @@ body.lasso #side{opacity:0;pointer-events:none}
       <button class="rb" id="un"><svg class="ic"><use href="#i-undo"/></svg><span>Undo</span></button><button class="rb" id="re"><svg class="ic"><use href="#i-redo"/></svg><span>Redo</span></button><button class="rb" id="home"><svg class="ic"><use href="#i-home"/></svg><span>Recenter</span></button><button class="rb" id="dup"><svg class="ic"><use href="#i-dup"/></svg><span>Duplicate</span></button><i class="sep"></i>
       <button class="rb" id="im"><svg class="ic"><use href="#i-up"/></svg><span>Upload</span></button><button class="rb" id="ex"><svg class="ic"><use href="#i-down"/></svg><span>Export</span></button><button class="rb" id="prt"><svg class="ic"><use href="#i-print"/></svg><span>Print / PDF</span></button><i class="sep"></i>
       <button class="rb" id="bm"><span id="bmi"></span><span>Light / dark</span></button><button class="rb" id="bgc" data-pop="1"><svg class="ic"><use href="#i-drop"/></svg><span>Background</span></button><button class="rb" id="bp" data-pop="1"><span><i class="dot pp"></i></span><span>Grid layout</span></button><button class="rb" id="bgo" data-pop="1"><svg class="ic"><use href="#i-op"/></svg><span>Grid opacity</span></button><i class="sep"></i>
-      <label class="rb wd"><input type="range" data-gl="ga" min="0" max="100" aria-label="Glass opacity"><span>Glass opacity</span></label><label class="rb wd"><input type="range" data-gl="rf" min="0" max="100" aria-label="Glass reflection"><span>Reflection</span></label><i class="sep"></i><button class="rb" id="bly" data-pop="1"><svg class="ic"><use href="#i-layout"/></svg><span>Layout</span></button>
+      <button class="rb" id="bga" data-pop="1"><svg class="ic"><use href="#i-gopa"/></svg><span>Glass opacity</span></button><button class="rb" id="brf" data-pop="1"><svg class="ic"><use href="#i-grf"/></svg><span>Reflection</span></button><i class="sep"></i><button class="rb" id="bly" data-pop="1"><svg class="ic"><use href="#i-layout"/></svg><span>Layout</span></button>
     </div>
     <div class="rg" id="g-ins">
       <button class="rb" id="iph"><svg class="ic"><use href="#i-photo"/></svg><span>Photo</span></button>
@@ -249,6 +260,8 @@ body.lasso #side{opacity:0;pointer-events:none}
 </div></nav>
 <div id="side" class="panel">
   <button id="bc" aria-label="Color"><i class="dot"></i></button>
+  <button id="bim" aria-label="Image adjustments"><svg class="ic"><use href="#i-set"/></svg></button>
+  <button id="bgx" aria-label="Graph style"><svg class="ic"><use href="#i-graph"/></svg></button>
   <button id="bs" aria-label="Size"></button>
   <button id="bf" class="txt" aria-label="Font">Aa</button>
   <button id="bo" aria-label="Opacity"><i class="dot op"></i></button>
@@ -260,7 +273,7 @@ body.lasso #side{opacity:0;pointer-events:none}
 <div id="pf" class="pop"><div class="pv w"></div><div id="fl"></div></div>
 <div id="po" class="pop"><div class="pv w"></div><div class="r"><input type="range" id="ov" min="10" max="100" aria-label="Opacity"><b id="ol"></b></div></div>
 <div id="pp" class="pop"></div>
-<div id="pbg" class="pop"></div><div id="pgo" class="pop"><div class="r"><span>Grid</span><input type="range" id="gov" min="0" max="100" aria-label="Grid opacity"><b id="gol"></b></div></div><div id="pss" class="pop"></div><div id="play" class="pop"></div>
+<div id="pbg" class="pop"></div><div id="pgo" class="pop"><div class="r"><span>Grid</span><input type="range" id="gov" min="0" max="100" aria-label="Grid opacity"><b id="gol"></b></div></div><div id="pss" class="pop"></div><div id="pga" class="pop"><div class="r"><input type="range" data-gl="ga" min="0" max="100" aria-label="Glass opacity"></div></div><div id="prf" class="pop"><div class="r"><input type="range" data-gl="rf" min="0" max="100" aria-label="Glass reflection"></div></div><div id="pim" class="pop"></div><div id="pgx" class="pop"></div><div id="play" class="pop"></div>
 <div id="prd" class="pop"><div class="pv" id="pvr" style="width:100%;height:76px;margin-bottom:10px"></div><div class="r"><input type="range" id="rv" min="0" max="100" aria-label="Corner radius"><b id="rl"></b></div></div>
 <div id="pgr" class="pop"><button data-g="fn">Function<small>y = f(x), several curves</small></button><button data-g="series">Data series<small>Line, bars, dots or pie</small></button><button data-g="sum">Sum Σ<small>Partial sums or terms of Σ f(n)</small></button></div>
 <div id="psy" class="pop"><div id="syt"></div><div id="syg"></div></div>
@@ -356,7 +369,7 @@ let st;const save=()=>{clearTimeout(st);st=setTimeout(()=>kvSet('doc',S),1200)};
 
 /* ---------- view ---------- */
 function setView(){const{x,y,z}=V();layer.style.transform=`translate(${x}px,${y}px) scale(${z})`;layer.style.setProperty('--iz',1/z);$('#zl').textContent=Math.round(z*100)+'%';if(lz!==null&&z!==lz)zshow();lz=z;vd=true;updFrame();if(G)updG();save()}
-function zoomAt(px,py,f){const v=V(),nz=Math.min(8,Math.max(.1,v.z*f)),k=nz/v.z;v.x=px-(px-v.x)*k;v.y=py-(py-v.y)*k;v.z=nz}
+function zoomAt(px,py,f){const v=V(),nz=Math.min(10,Math.max(.01,v.z*f)),k=nz/v.z;v.x=px-(px-v.x)*k;v.y=py-(py-v.y)*k;v.z=nz}
 function resize(){const d=devicePixelRatio||1;cv.width=innerWidth*d;cv.height=innerHeight*d;dirty=true}
 const zshow=()=>{$('#zl').classList.add('show');clearTimeout(zT);zT=setTimeout(()=>$('#zl').classList.remove('show'),1000)};
 
@@ -413,8 +426,18 @@ function render(){const full=dirty;dirty=vd=false;if(full){cver++;bkOld=1}const 
       ctx.globalAlpha=1}}
   ctx.setTransform(d*z,0,0,d*z,x*d,y*d);
   const vx0=-x/z,vy0=-y/z,vx1=(W-x)/z,vy1=(H-y)/z;
-  for(const t of S.texts)if(t.img){const i=imgOf(t);if(i.complete&&i.naturalWidth)ctx.drawImage(i,t.x,t.y,t.w,t.h)}
+  for(const t of S.texts)if(t.img){const i=imgOf(t);if(i.complete&&i.naturalWidth)ctx.drawImage(t.gspec?i:fxSrc(t,i),t.x,t.y,t.w,t.h)}
   blit();ctx.setTransform(d*z,0,0,d*z,x*d,y*d);if(cur)drawStroke(cur);if(lp&&lp.length>1){ctx.save();ctx.lineJoin='round';ctx.strokeStyle=ctx.fillStyle=S.accent;ctx.lineWidth=1.6/z;ctx.setLineDash([7/z,5/z]);pathOf([lp]);ctx.stroke();ctx.globalAlpha=.08;ctx.fill();ctx.restore()}mmD=1}
+const FXD={blur:0,r:100,g:100,b:100,sat:100,bri:100,fh:0,fv:0},FXC=new WeakMap(),fxDef=f=>!f||Object.keys(FXD).every(k=>(f[k]??FXD[k])===FXD[k]);
+function fxSrc(t,im){const f=t.fx;if(fxDef(f))return im;const key=JSON.stringify(f),c0=FXC.get(t);if(c0&&c0.k===key&&c0.src===im)return c0.cv;
+  const w=im.naturalWidth,h=im.naturalHeight,cv=document.createElement('canvas');cv.width=w;cv.height=h;const x=cv.getContext('2d');
+  x.save();x.translate(f.fh?w:0,f.fv?h:0);x.scale(f.fh?-1:1,f.fv?-1:1);
+  const rad=(f.blur||0)*Math.max(w,h)/800;
+  if(rad>.3){if('filter' in x){x.filter='blur('+rad+'px)';x.drawImage(im,0,0)}else{const k=Math.max(1,rad*1.5),sw=Math.max(2,Math.round(w/k)),sh=Math.max(2,Math.round(h/k)),s=document.createElement('canvas');s.width=sw;s.height=sh;const sx=s.getContext('2d');sx.imageSmoothingQuality='high';sx.drawImage(im,0,0,sw,sh);x.imageSmoothingQuality='high';x.drawImage(s,0,0,w,h)}}else x.drawImage(im,0,0);
+  x.restore();
+  const R=(f.r??100)/100,G=(f.g??100)/100,B=(f.b??100)/100,sa=(f.sat??100)/100,br=(f.bri??100)/100;
+  if(R!==1||G!==1||B!==1||sa!==1||br!==1){const d=x.getImageData(0,0,w,h),a=d.data;for(let i=0;i<a.length;i+=4){let r=a[i]*R*br,g=a[i+1]*G*br,b=a[i+2]*B*br;const y=.299*r+.587*g+.114*b;a[i]=y+(r-y)*sa;a[i+1]=y+(g-y)*sa;a[i+2]=y+(b-y)*sa}x.putImageData(d,0,0)}
+  FXC.set(t,{k:key,src:im,cv});return cv}
 const IM=new WeakMap(),imgOf=t=>{let i=IM.get(t);if(!i){i=new Image();i.onload=()=>dirty=true;i.src=t.img;IM.set(t,i)}return i};
 const bbox=s=>{const m=s.size*3;let a=1e9,b=1e9,c=-1e9,e=-1e9;for(const p of s.pts){a=Math.min(a,p[0]);b=Math.min(b,p[1]);c=Math.max(c,p[0]);e=Math.max(e,p[1])}return[a-m,b-m,c+m,e+m]};
 const world=e=>[(e.clientX-V().x)/V().z,(e.clientY-V().y)/V().z];
@@ -432,7 +455,7 @@ const isLn=()=>SEL.k==='shape'&&LINE(SEL.o.kind),padOf=()=>SEL.k==='shape'?9/V()
 function setGm(o,k,q){if(k==='note'){o.w=q.w;o.h=q.h;o.x=q.cx-q.w/2;o.y=q.cy-q.h/2;place(o)}else{Object.assign(o,{cx:q.cx,cy:q.cy,w:q.w,h:q.h,rot:q.rot});dirty=true}updFrame()}
 function updFrame(){sf.classList.toggle('vis',!!SEL);if(!SEL)return;const q=gm(SEL.o,SEL.k),p=padOf();
   sf.style.cssText=`width:${q.w+2*p}px;height:${(isLn()?0:q.h)+2*p}px;transform:translate(${q.cx}px,${q.cy}px) rotate(${q.rot}rad) translate(-50%,-50%)`;sf.classList.toggle('sh',SEL.k==='shape')}
-const sel=(k,o)=>{SEL={k,o};updFrame()},desel=()=>{SEL=null;updFrame();if(autoSel){autoSel=false;tool='select';sync()}};
+const sel=(k,o)=>{SEL={k,o};updFrame();selUI()},desel=()=>{SEL=null;updFrame();selUI();if(autoSel){autoSel=false;tool='select';sync()}};
 function inFrame(x,y){const q=gm(SEL.o,SEL.k),p=padOf(),c=Math.cos(q.rot),s=Math.sin(q.rot),dx=x-q.cx,dy=y-q.cy;return Math.abs(dx*c+dy*s)<=q.w/2+p&&Math.abs(-dx*s+dy*c)<=(isLn()?0:q.h/2)+p}
 function hitItem(x,y){if(SEL&&inFrame(x,y))return SEL;
   for(let i=S.texts.length-1;i>=0;i--){const t=S.texts[i];if(!t.img&&x>=t.x&&x<=t.x+t.w&&y>=t.y&&y<=t.y+t.h)return{k:'note',o:t}}
@@ -587,7 +610,7 @@ function pvSize(){const c=inkc(),a=curAl()/100;
   if(tool==='er')return`<i style="width:${SZ.er}px;height:${SZ.er}px;border:2px solid var(--fg);border-radius:50%"></i>`;
   if(tool==='shape')return`<i style="width:64px;height:64px;border:${SZ.shape/5}px solid ${c};opacity:${a};border-radius:50%"></i>`;
   const d=tool==='hl'?SZ.hl:SZ.pen/5;return`<i style="width:${d}px;height:${d}px;border-radius:50%;background:${c};opacity:${a}"></i>`}
-function sync(){const R=document.documentElement;R.dataset.theme=S.theme;R.style.setProperty('--acc',S.accent);document.body.className=tool+(autoSel?' auto':'')+(tool==='shape'&&LINE(shp.kind)?' ln':'');
+function sync(){const R=document.documentElement;R.dataset.theme=S.theme;R.style.setProperty('--acc',S.accent);document.body.className=tool+(autoSel?' auto':'')+selCls()+(tool==='shape'&&LINE(shp.kind)?' ln':'');
   if(SEL&&!(SEL.k==='note'?(tool==='text'||tool==='select'):(tool==='shape'||tool==='select')))desel();
   if(!CUR())ec.style.display='none';
   const on=(sel,k,val)=>document.querySelectorAll(sel).forEach(b=>b.classList.toggle('on',b.dataset[k]==val));
@@ -711,17 +734,20 @@ function evalFn(src){let e=src.trim().toLowerCase().replace(/\^/g,'**').replace(
   if(!e)throw Error('Empty expression');if(!/^[\w\s+\-*\/().,]*$/.test(e))throw Error('Unsupported character');
   (e.match(/[a-z_]\w*/gi)||[]).forEach(w=>{if(!/^\d/.test(w)&&w!=='x'&&w!=='n'&&!(w in Math))throw Error('Unknown name: '+w)});
   try{return new Function('x','with(Math){var n=x;return '+e+'}')}catch{throw Error('Cannot read that expression (try -(x^2) instead of -x^2)')}}
-function plot(c,sp){const g=c.getContext('2d'),W=c.width,H=c.height,u=W/400,L=46*u,R=14*u,T=(sp.t==='sum'?34:14)*u,B=28*u,pw=W-L-R,ph=H-T-B,PAL=['#e0562d','#3f6fd8','#3f8a3d','#b07a00','#a626a4'],INK='#2b2820',
+function dot(g,x,y,r,s){g.beginPath();if(s==='square')g.rect(x-r,y-r,2*r,2*r);else if(s==='diamond'){g.moveTo(x,y-r*1.3);g.lineTo(x+r*1.3,y);g.lineTo(x,y+r*1.3);g.lineTo(x-r*1.3,y)}
+  else if(s==='triangle'){g.moveTo(x,y-r*1.3);g.lineTo(x+r*1.2,y+r);g.lineTo(x-r*1.2,y+r)}
+  else if(s==='cross'){g.moveTo(x-r,y-r);g.lineTo(x+r,y+r);g.moveTo(x+r,y-r);g.lineTo(x-r,y+r);g.save();g.lineWidth=Math.max(1,r*.7);g.stroke();g.restore();return}else g.arc(x,y,r,0,7);g.closePath();g.fill()}
+function plot(c,sp){const g=c.getContext('2d'),W=c.width,H=c.height,u=W/400,L=46*u,R=14*u,T=(sp.t==='sum'?34:14)*u,B=28*u,pw=W-L-R,ph=H-T-B,BG=sp.bg||'#fbf8ec',lum=h=>{const q=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));return(.299*q[0]+.587*q[1]+.114*q[2])/255},INK=lum(BG)<.5?'#f2efe6':'#2b2820',PAL0=['#e0562d','#3f6fd8','#3f8a3d','#b07a00','#a626a4'],PAL=sp.col&&/^#[0-9a-f]{6}$/i.test(sp.col)?[sp.col,...PAL0.filter(c=>c!==sp.col)]:PAL0,
     fm=v=>String(+v.toPrecision(4)),num=q=>q.split(/[\s,;]+/).filter(Boolean).map(Number);
   let D=[],xa,xb,ya,yb,kind='line',txt='';
-  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W,H);g.fillStyle='#fbf8ec';g.fillRect(0,0,W,H);g.font=12*u+'px system-ui,sans-serif';
+  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W,H);g.fillStyle=BG;g.fillRect(0,0,W,H);g.font=12*u+'px system-ui,sans-serif';
   if(sp.t==='fn'){xa=+sp.xa;xb=+sp.xb;if(!(xb>xa))throw Error('x min must be less than x max');
     for(const e of sp.e.split(';')){if(!e.trim())continue;const f=evalFn(e),p=[];for(let i=0;i<=500;i++){const x=xa+(xb-xa)*i/500,y=f(x);p.push(isFinite(y)?[x,y]:null)}D.push(p)}if(!D.length)throw Error('Enter a function')}
   else if(sp.t==='series'){const ln=sp.d.trim().split('\n').map(num),pairs=ln.length>1&&ln.every(l=>l.length===2&&!l.some(isNaN)),v=num(sp.d.replace(/\n/g,' '));
     if(!v.length||v.some(isNaN))throw Error('Enter numbers only');D.push(pairs?ln:v.map((y,i)=>[i+1,y]));kind=sp.s;
     if(kind==='pie'){const a0=D[0].map(q=>Math.abs(q[1])),tot=a0.reduce((a,b)=>a+b,0)||1,cx=W/2,cy=H/2,r=Math.min(W,H)*.4;let a=-Math.PI/2;
-      a0.forEach((x,i)=>{const b=a+x/tot*Math.PI*2;g.fillStyle=PAL[i%5];g.beginPath();g.moveTo(cx,cy);g.arc(cx,cy,r,a,b);g.closePath();g.fill();g.strokeStyle='#fbf8ec';g.lineWidth=2*u;g.stroke();
-        const m=(a+b)/2;g.fillStyle='#fff';g.textAlign='center';g.textBaseline='middle';if(x/tot>.04)g.fillText(Math.round(x/tot*100)+'%',cx+Math.cos(m)*r*.65,cy+Math.sin(m)*r*.65);a=b});return}}
+      a0.forEach((x,i)=>{const b=a+x/tot*Math.PI*2;g.fillStyle=PAL[i%5];g.beginPath();g.moveTo(cx,cy);g.arc(cx,cy,r,a,b);g.closePath();g.fill();g.strokeStyle=BG;g.lineWidth=2*u;g.stroke();
+        const m=(a+b)/2;g.fillStyle=lum(PAL[i%5])>.6?'#111':'#fff';g.textAlign='center';g.textBaseline='middle';if(x/tot>.04)g.fillText(Math.round(x/tot*100)+'%',cx+Math.cos(m)*r*.65,cy+Math.sin(m)*r*.65);a=b});return}}
   else{const f=evalFn(sp.e),a=Math.round(+sp.a),b=Math.round(+sp.b);if(!(b>=a)||b-a>500)throw Error('Use a range of at most 500 terms');let sum=0;const p=[];
     for(let n=a;n<=b;n++){const t=f(n);if(!isFinite(t))throw Error('Term is not finite at n='+n);sum+=t;p.push([n,sp.s==='terms'?t:sum])}D.push(p);kind=sp.s==='terms'?'bar':'both';txt='Σ f(n), n = '+a+'…'+b+'   =   '+fm(sum)}
   const pts=D.flat().filter(Boolean);
@@ -732,22 +758,22 @@ function plot(c,sp){const g=c.getContext('2d'),W=c.width,H=c.height,u=W/400,L=46
     if(kind==='bar'){lo=Math.min(lo,0);hi=Math.max(hi,0)}if(lo===hi){lo-=1;hi+=1}const d=(hi-lo)*.08;ya=lo-d;yb=hi+d}
   const X=x=>L+(x-xa)/(xb-xa)*pw,Y=y=>T+ph-(y-ya)/(yb-ya)*ph,nice=(a,b)=>{const r=(b-a)/6,m=10**Math.floor(Math.log10(r)),k=r/m;return(k<1.5?1:k<3.5?2:k<7.5?5:10)*m},sx=nice(xa,xb),sy=nice(ya,yb);
   g.lineWidth=u;g.fillStyle=INK;g.textAlign='center';g.textBaseline='top';
-  for(let v=Math.ceil(xa/sx)*sx;v<=xb+1e-9;v+=sx){g.strokeStyle='#2b282222';g.beginPath();g.moveTo(X(v),T);g.lineTo(X(v),T+ph);g.stroke();g.fillText(fm(v),X(v),T+ph+4*u)}
+  for(let v=Math.ceil(xa/sx)*sx;v<=xb+1e-9;v+=sx){g.strokeStyle=INK+'22';g.beginPath();g.moveTo(X(v),T);g.lineTo(X(v),T+ph);g.stroke();g.fillText(fm(v),X(v),T+ph+4*u)}
   g.textAlign='right';g.textBaseline='middle';
-  for(let v=Math.ceil(ya/sy)*sy;v<=yb+1e-9;v+=sy){g.strokeStyle='#2b282222';g.beginPath();g.moveTo(L,Y(v));g.lineTo(L+pw,Y(v));g.stroke();g.fillText(fm(v),L-5*u,Y(v))}
+  for(let v=Math.ceil(ya/sy)*sy;v<=yb+1e-9;v+=sy){g.strokeStyle=INK+'22';g.beginPath();g.moveTo(L,Y(v));g.lineTo(L+pw,Y(v));g.stroke();g.fillText(fm(v),L-5*u,Y(v))}
   g.strokeStyle=INK;g.lineWidth=1.5*u;g.strokeRect(L,T,pw,ph);
   g.beginPath();if(ya<0&&yb>0){g.moveTo(L,Y(0));g.lineTo(L+pw,Y(0))}if(xa<0&&xb>0){g.moveTo(X(0),T);g.lineTo(X(0),T+ph)}g.stroke();
   g.save();g.beginPath();g.rect(L,T,pw,ph);g.clip();
-  D.forEach((p,i)=>{const col=PAL[i%5];g.strokeStyle=g.fillStyle=col;g.lineWidth=2.2*u;g.lineJoin='round';
+  D.forEach((p,i)=>{const col=PAL[i%5];g.strokeStyle=g.fillStyle=col;g.lineWidth=(+sp.lw||2.2)*u;g.lineJoin='round';
     if(kind==='bar'){const bw=Math.max(1,pw/(xb-xa)*.7);for(const q of p)if(q)g.fillRect(X(q[0])-bw/2,Math.min(Y(q[1]),Y(0)),bw,Math.abs(Y(q[1])-Y(0)))}
     else{if(kind!=='dot'){let pen=0,prev=0;g.beginPath();for(const q of p){if(!q){pen=0;continue}const px=X(q[0]),py=Y(q[1]);if(!pen||Math.abs(py-prev)>ph*2)g.moveTo(px,py);else g.lineTo(px,py);pen=1;prev=py}g.stroke()}
-      if(sp.t!=='fn'&&p.length<=80)for(const q of p){g.beginPath();g.arc(X(q[0]),Y(q[1]),3.4*u,0,7);g.fill()}}});
+      if(sp.t!=='fn'&&p.length<=80&&(+(sp.ds??3.4))>0)for(const q of p)dot(g,X(q[0]),Y(q[1]),(+(sp.ds??3.4))*u,sp.dsh)}});
   g.restore();if(txt){g.fillStyle=INK;g.textAlign='left';g.textBaseline='top';g.fillText(txt,L,10*u)}}
 let GT='fn';
 const GD={fn:{e:'sin(x); x^2/10',xa:'-10',xb:'10',ya:'',yb:''},series:{d:'3, 5, 2, 8, 6, 9',s:'line'},sum:{e:'1/n^2',a:'1',b:'20',s:'part'}},
  GL={fn:[['e','Function(s), separated by ;'],['xa','x min'],['xb','x max'],['ya','y min (blank = auto)'],['yb','y max (blank = auto)']],series:[['d','Values, comma separated, or one "x y" pair per line','t'],['s','Style','line|bar|dot|pie']],sum:[['e','Term f(n)'],['a','From n ='],['b','To n ='],['s','Show','part|terms']]},
  GN={fn:'Function graph',series:'Data series',sum:'Sum Σ'};
-function gRead(){const sp={t:GT};$('#gf').querySelectorAll('[data-k]').forEach(i=>{sp[i.dataset.k]=i.value;GD[GT][i.dataset.k]=i.value});return sp}
+function gRead(){const sp={t:GT};$('#gf').querySelectorAll('[data-k]').forEach(i=>{sp[i.dataset.k]=i.value;GD[GT][i.dataset.k]=i.value});if(GE&&GE.gspec)['bg','col','lw','ds','dsh'].forEach(k=>{if(GE.gspec[k]!==undefined)sp[k]=GE.gspec[k]});return sp}
 function gUpd(){try{plot($('#gpv'),gRead());$('#ge').textContent=''}catch(err){$('#ge').textContent=err.message}}
 let GE=null;function gOpen(t,ed){GE=ed||null;GT=t;if(ed)Object.assign(GD[t],ed.gspec);$('#gt').textContent=GN[t];
   $('#gf').innerHTML=GL[t].map(([k,l,o])=>`<label class="gl">${l}${o==='t'?`<textarea class="fi" data-k="${k}" rows="3"></textarea>`:o?`<select class="fi" data-k="${k}">${o.split('|').map(v=>`<option>${v}</option>`).join('')}</select>`:`<input class="fi" data-k="${k}">`}</label>`).join('');
@@ -824,9 +850,28 @@ addEventListener('keyup',e=>{if(e.code==='Space')space=false});
 addEventListener('resize',resize);
 (function loop(){if(tv!==tvB){const k=Math.min(1,(performance.now()-tvT)/450);tv=k>=1?tvB:tvA+(tvB-tvA)*(k*k*(3-2*k));dirty=true}if(dirty||vd)render();requestAnimationFrame(loop)})();
 
+/* image + graph option panels, glass buttons */
+const selCls=()=>SEL&&SEL.k==='note'&&SEL.o.img?(SEL.o.gspec?' gph':' img'):'';
+function selUI(){const o=SEL&&SEL.k==='note'&&SEL.o.img?SEL.o:null,B=document.body.classList;B.toggle('img',!!o&&!o.gspec);B.toggle('gph',!!o&&!!o.gspec);if(!o||o.gspec)$('#pim').classList.remove('open');if(!o||!o.gspec)$('#pgx').classList.remove('open')}
+$('#bga').onclick=e=>pop('pga',e.currentTarget,'b');$('#brf').onclick=e=>pop('prf',e.currentTarget,'b');
+const FXL=[['blur','Blur',0,40],['r','Red',0,200],['g','Green',0,200],['b','Blue',0,200],['sat','Saturation',0,200],['bri','Brightness',0,200]];
+$('#pim').innerHTML=FXL.map(([k,n,a,b])=>`<label class="lyr"><span>${n}</span><input type="range" min="${a}" max="${b}" data-fx="${k}"></label>`).join('')+`<div class="seg" style="margin-top:12px"><button data-flip="fh">Flip horizontal</button><button data-flip="fv">Flip vertical</button><button data-flip="rs">Reset</button></div>`;
+function fxFill(){if(!SEL)return;const f=SEL.o.fx||{};$('#pim').querySelectorAll('[data-fx]').forEach(i=>i.value=f[i.dataset.fx]??FXD[i.dataset.fx]);$('#pim').querySelectorAll('[data-flip]').forEach(b=>b.classList.toggle('on',!!f[b.dataset.flip]))}
+$('#bim').onclick=e=>{fxFill();pop('pim',e.currentTarget,SSd())};
+$('#pim').addEventListener('input',e=>{const k=e.target.dataset.fx;if(!k||!SEL)return;(SEL.o.fx=SEL.o.fx||{})[k]=+e.target.value;vd=true;save()});
+$('#pim').addEventListener('click',e=>{const b=e.target.closest('[data-flip]');if(!b||!SEL)return;const o=SEL.o,k=b.dataset.flip;if(k==='rs')o.fx={};else{o.fx=o.fx||{};o.fx[k]=o.fx[k]?0:1}vd=true;save();fxFill()});
+const GBG=['#fbf8ec','#ffffff','#eef2f7','#fff1cf','#1b1d24','#0f1115','#14211b','#241b2b'],GCO=['auto','#e0562d','#3f6fd8','#3f8a3d','#b07a00','#a626a4','#d62f6b','#111111'],GDS=[['circle','●'],['square','■'],['diamond','◆'],['triangle','▲'],['cross','✚']];
+function gxDraw(){const t=SEL&&SEL.o;if(!t||!t.gspec)return;const s=t.gspec,hx=v=>/^#[0-9a-f]{6}$/i.test(v||''),
+  sw=(k,list,cur,dv)=>`<div class="gsw">${list.map(c=>`<button class="swb${c===cur?' on':''}" data-gk="${k}" data-gv="${c}" aria-label="${c}" style="background:${c==='auto'?'conic-gradient(#e0562d 25%,#3f6fd8 0 50%,#3f8a3d 0 75%,#b07a00 0)':c}"></button>`).join('')}<input type="color" data-gc="${k}" value="${hx(cur)?cur:dv}" aria-label="Custom color"></div>`;
+  $('#pgx').innerHTML=`<div class="lyt">Background</div>${sw('bg',GBG,s.bg||'#fbf8ec','#fbf8ec')}<div class="lyt">${s.t==='fn'?'Function color':'Series color'}</div>${sw('col',GCO,s.col||'auto','#e0562d')}<label class="lyr"><span>Line width</span><input type="range" min="1" max="8" step=".5" value="${s.lw??2.2}" data-gr="lw"></label>${s.t==='fn'?'':`<label class="lyr"><span>Dot size</span><input type="range" min="0" max="10" step=".5" value="${s.ds??3.4}" data-gr="ds"></label><div class="lyt">Dot shape</div><div class="seg">${GDS.map(([v,ch])=>`<button data-gs="${v}" aria-label="${v}" class="${(s.dsh||'circle')===v?'on':''}">${ch}</button>`).join('')}</div>`}`}
+let rgT=0;function regraph(t){cancelAnimationFrame(rgT);rgT=requestAnimationFrame(()=>{try{const c=document.createElement('canvas');c.width=800;c.height=500;plot(c,t.gspec);t.img=c.toDataURL('image/png');const ni=new Image();ni.onload=()=>{IM.set(t,ni);vd=true};ni.src=t.img;save()}catch(err){}})}
+function setG(k,v){const t=SEL.o;if(v==null||v==='auto')delete t.gspec[k];else t.gspec[k]=v;regraph(t)}
+$('#bgx').onclick=e=>{gxDraw();pop('pgx',e.currentTarget,SSd())};
+$('#pgx').addEventListener('click',e=>{if(!SEL)return;const s=e.target.closest('[data-gv]');if(s){setG(s.dataset.gk,s.dataset.gv);gxDraw();return}const d=e.target.closest('[data-gs]');if(d){setG('dsh',d.dataset.gs);gxDraw()}});
+$('#pgx').addEventListener('input',e=>{if(!SEL)return;const c=e.target.dataset.gc,r=e.target.dataset.gr;if(c)setG(c,e.target.value);else if(r)setG(r,+e.target.value)});
 /* spreadsheet size picker, lasso, layout, morphing mode indicator */
 let sgc=6,sgr=4;
-function ssDraw(){$('#pss').innerHTML=`<div id="ssg" style="grid-template-columns:repeat(${sgc},34px)">${Array.from({length:sgc*sgr},(_,i)=>`<i data-c="${i%sgc+1}" data-r="${Math.floor(i/sgc)+1}"></i>`).join('')}</div><div id="ssl">Choose a size</div>`}
+function ssDraw(){$('#pss').innerHTML=`<div id="ssg" style="grid-template-columns:repeat(${sgc},18px)">${Array.from({length:sgc*sgr},(_,i)=>`<i data-c="${i%sgc+1}" data-r="${Math.floor(i/sgc)+1}"></i>`).join('')}</div><div id="ssl">Choose a size</div>`}
 function ssHover(c,r){let ch=0;if(c===sgc&&sgc<12){sgc++;ch=1}if(r===sgr&&sgr<12){sgr++;ch=1}if(ch)ssDraw();$('#ssg').querySelectorAll('i').forEach(i=>i.classList.toggle('on',+i.dataset.c<=c&&+i.dataset.r<=r));$('#ssl').textContent=r+' rows × '+c+' columns'}
 $('#pss').addEventListener('pointerover',e=>{const i=e.target.closest('[data-c]');if(i)ssHover(+i.dataset.c,+i.dataset.r)});
 $('#pss').addEventListener('click',e=>{const i=e.target.closest('[data-c]');if(i){closeAll();mkSheet(+i.dataset.r,+i.dataset.c)}});
